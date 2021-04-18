@@ -14,10 +14,7 @@ size_t hash_int_pair::custom_hash_fn(const unsigned int input) const
 
 size_t hash_int_pair::operator()(const uint64_t index_pair) const
 {
-	//return hash_fn(index_pair.first) ^ hash_fn(index_pair.second);  //This has the undesired property that hash(a,a) = hash(b,b), for any a,b
-	//return hash_fn(index_pair.first * 3) ^ hash_fn(index_pair.second);
-	//return hash_fn(((int) (index_pair >> 32)) * 3) ^ hash_fn((int) (index_pair & 0x00000000FFFFFFFF));
-	return custom_hash_fn(((unsigned int) (index_pair >> 32)) * 3) ^ custom_hash_fn((unsigned int) (index_pair & 0x00000000FFFFFFFF));	
+	return custom_hash_fn(((unsigned int) (index_pair >> 32)) * 3) ^ custom_hash_fn((unsigned int) (index_pair & 0x00000000FFFFFFFF));
 }
 
 //******************************************************
@@ -28,7 +25,6 @@ SpMatr_hash::SpMatr_hash() : nb_rows(0), nb_cols(0)
 SpMatr_hash::SpMatr_hash(int nb_rows, int nb_cols, int expected_nnz) : nb_rows(nb_rows), nb_cols(nb_cols)
 {	
 	val.max_load_factor(1.0);
-	//val.reserve(expected_nnz);
 	val.rehash(expected_nnz);
 }
 
@@ -36,7 +32,6 @@ void SpMatr_hash::print_matrix()
 {
 	for(SpMatr_hash::iterator iter = val.begin(); iter != val.end(); iter++)
 	{
-		//cout << "(" << (iter->first).first << ", " << (iter->first).second << ") = " << iter->second << "\n";
 		cout << "(" << first_int(iter) << ", " << second_int(iter) << ") = " << iter->second << "\n";
 	}
 }
@@ -44,7 +39,6 @@ void SpMatr_hash::print_matrix()
 double& SpMatr_hash::operator()(uint64_t i,uint64_t j)
 {
 	return val[(i << 32) | j];
-	//return val[pair<int,int>(i,j)];
 }
 
 int SpMatr_hash::get_nnz()
@@ -99,7 +93,6 @@ void SpMatr_hash_fast::print_matrix()
 {
 	for(SpMatr_hash_fast::iterator iter = val.begin(); iter != val.end(); iter++)
 	{
-		//cout << "(" << (iter->first).first << ", " << (iter->first).second << ") = " << iter->second << "\n";
 		cout << "(" << first_int(iter) << ", " << second_int(iter) << ") = " << iter->second << "\n";
 	}
 }
@@ -107,7 +100,6 @@ void SpMatr_hash_fast::print_matrix()
 double& SpMatr_hash_fast::operator()(uint64_t i,uint64_t j)
 {	
 	return val[(i << 32) | j];
-	//return val[pair<int,int>(i,j)];
 }
 
 int SpMatr_hash_fast::get_nnz()
@@ -163,7 +155,6 @@ SpMatr_CSR::SpMatr_CSR(SpMatr_hash& init_matrix, bool ordered) : ordered(ordered
 		//Count number of non-zeros in each row and store it in rowst_index (temporarily)
 		for(SpMatr_hash::iterator iter = init_matrix.begin(); iter != init_matrix.end(); iter++)
 		{
-			//rowst_index[(iter->first).first - 1] += 1;  //The -1 is because of one-based indexing
 			rowst_index[init_matrix.first_int(iter) - 1] += 1;  //The -1 is because of one-based indexing
 		}
 
@@ -364,7 +355,6 @@ SpMatr_CSR::SpMatr_CSR(SpMatr_hash_fast& init_matrix, bool ordered) : ordered(or
 		//Count number of non-zeros in each row and store it in rowst_index (temporarily)
 		for(SpMatr_hash_fast::iterator iter = init_matrix.begin(); iter != init_matrix.end(); iter++)
 		{
-			//rowst_index[(iter->first).first - 1] += 1;  //The -1 is because of one-based indexing			
 			rowst_index[init_matrix.first_int(iter) - 1] += 1;  //The -1 is because of one-based indexing
 		}
 
