@@ -1,5 +1,11 @@
 #include "spmatr.h"
 
+
+/**
+ * In general some people prefer to either only import what they need
+ * like using std::ostream; Or just use the folly qualified name for object in std
+ * like std::string, instead of just string.
+ */
 using namespace std;
 
 //SpMatr_hash definitions
@@ -82,7 +88,8 @@ SpMatr_hash_fast::SpMatr_hash_fast() : nb_rows(0), nb_cols(0)
 
 SpMatr_hash_fast::SpMatr_hash_fast(int nb_rows, int nb_cols, int expected_nnz) : nb_rows(nb_rows), nb_cols(nb_cols)
 {	
-	val.set_empty_key(0xFFFFFFFFFFFFFFFF);
+	//Note : Most people would prefer to have constant predefined somewhere on top.
+        val.set_empty_key(0xFFFFFFFFFFFFFFFF);
 	val.set_deleted_key(0xFFFFFFFFFFFFFFFE);
 	val.min_load_factor(0);
 	val.max_load_factor(0.8);
@@ -139,7 +146,9 @@ unsigned int SpMatr_hash_fast::second_int(iterator& iter)
 
 //***************************************************
 //SpMatr_CSR definitions
-
+/**
+ * Note : probably want const SpMatr_hash& init_matrix;
+ */
 SpMatr_CSR::SpMatr_CSR(SpMatr_hash& init_matrix, bool ordered) : ordered(ordered)
 {	
 	nb_rows = init_matrix.get_nb_rows();
@@ -149,7 +158,13 @@ SpMatr_CSR::SpMatr_CSR(SpMatr_hash& init_matrix, bool ordered) : ordered(ordered
 	if(ordered == false) //Elements in each row will not necessarily be sorted by column index
 	{
 		//Allocate rowst_index array and set it to zero
-		rowst_index = (int*) malloc(sizeof(int) * (nb_rows + 1)); //Size is nb_rows plus one dummy index at the end
+		//Note  : the use of C-style cast are mainly deprecated, [https://www.stroustrup.com/bs_faq2.html#static-cast]
+                // usually you want to use  static_cast<T> here
+                //Note : In general , raw allocations are also deprecated in favor of automatic memory management
+                // here i would do
+                // rowst_index =  std::make_unique<int[]>((nb_rows + 1));
+
+                rowst_index = (int*) malloc(sizeof(int) * (nb_rows + 1)); //Size is nb_rows plus one dummy index at the end
 		memset(rowst_index, 0, sizeof(int) * (nb_rows + 1));
 
 		//Count number of non-zeros in each row and store it in rowst_index (temporarily)
@@ -419,6 +434,13 @@ SpMatr_CSR::~SpMatr_CSR()
 	free(columns);
 	free(rowst_index);	
 }
+/**
+ * Note : in general, the assign operator as a predefined semantic .And this implementation doesn't seem to follow those rules.
+ * In particular,depending on your data ownership model ( can multiple matrices  share the same columns buffer?)
+ * in this case, a1 = a2 should do a deep copy of the data. But here it looks like you only copying the pointers.
+ * Probably you want here you the rvalue version  SpMatr_CSR& SpMatr_CSR::operator=(SpMatr_CSR && assigned_matrix)
+ * Also since here assigned_matrix is no longer used, you dont really need to swap the values, just assigning them should be sufficient
+ */
 
 SpMatr_CSR& SpMatr_CSR::operator=(SpMatr_CSR assigned_matrix)  //assigned_matrix is passed by value (hence is copied using the copy constructor)
 {
@@ -489,6 +511,9 @@ int* SpMatr_CSR::get_rowst_index_ptr()
 	return rowst_index;
 }
 
+/**
+ * Note:  i would make this a bit  more  general with print_array(std::ostream & out);
+ */
 void SpMatr_CSR::print_arrays()
 {
 	cout << setw(15) << "values: ";
@@ -643,7 +668,8 @@ cg_rci:
 	dcg(&nb_dof, solution, rhs, &CG_rci_request, CG_ipar, CG_dpar, CG_tmp);
 
 	if(CG_rci_request == 0)  //Solution was found and stopping criterion satisfied (or max nb. of iterations reached)
-		goto cg_getsln;
+	    // Note:  goto should be avoided.
+            goto cg_getsln;
 
 	if(CG_rci_request == -1)
 	{
