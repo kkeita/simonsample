@@ -6,7 +6,7 @@ using namespace std;
 size_t hash_int_pair::custom_hash_fn(const unsigned int input) const
 {
 	size_t hash_result;
-	hash_result = ((input >> 16) ^ input) * 0x45d9f3b;
+        hash_result = ((input >> 16) ^ input) * 0x45d9f3b;
     hash_result = ((hash_result >> 16) ^ hash_result) * 0x45d9f3b;
     hash_result = (hash_result >> 16) ^ hash_result;
     return hash_result;
@@ -335,10 +335,8 @@ SpMatr_CSR::SpMatr_CSR(SpMatr_hash_fast& init_matrix, bool ordered) : ordered(or
 		int counter = 1;  //Will hold index in values_temp, link and rows where new elements have to be added
 		for(SpMatr_hash_fast::iterator iter = init_matrix.begin(); iter != init_matrix.end(); iter++)
 		{
-			//col_index = (iter->first).second;  //Column index of element to insert
 			col_index = init_matrix.second_int(iter);  //Column index of element to insert
 			values_temp[counter-1] = iter->second;  //-1 because of one-based indexing
-			//rows[counter-1] = (iter->first).first;
 			rows[counter-1] = init_matrix.first_int(iter);
 			link[counter-1] = colst_index[col_index-1];  //Set link to previous first element in column list
 			colst_index[col_index-1] = counter;  //Set first element in column list to the element just added
@@ -518,17 +516,7 @@ void SpMatr_CSR::print_arrays()
 //****************************************************
 void test_spmatr()
 {
-	/*
-	SpMatr_hash my_matrix(4,4,5);
-	
-	my_matrix(1,1) = 2.0;
-	my_matrix(2,1) = 14.5;
-	//my_matrix(1,1) = my_matrix(1,1) + 1.5;
-	my_matrix(1,1) += 1.5;
-	//my_matrix.print_matrix();
-	*/
 
-	//SpMatr_hash my_matrix2(5, 7, 9);
 	SpMatr_hash_fast my_matrix2(5, 7, 9);
 
 	my_matrix2(1,1) = 1;
@@ -541,28 +529,11 @@ void test_spmatr()
 	my_matrix2(4,4) = 7;
 	my_matrix2(5,7) = -5;
 	my_matrix2(5,7) += -3;
-	
 
-	//SpMatr_CSR my_CSR_matrix(my_matrix2, false);
-	SpMatr_CSR my_CSR_matrix(my_matrix2, true);
+        SpMatr_CSR my_CSR_matrix(my_matrix2, true);
 
 	my_CSR_matrix.print_arrays();
 
-	/*
-	//Timing test to compare my_matrix(1,1) = my_matrix(1,1) + x with my_matrix(1,1 += x
-	double cpu_time1, cpu_time2;
-	my_matrix(1,1) = 0;
-
-	cpu_time1 = dsecnd();
-	for(int k = 0; k < 100000; k++)
-	{
-		//my_matrix(1,1) = my_matrix(1,1) + 1.0; //this takes 2.60 ms
-		my_matrix(1,1) += 1.0;					//this takes 1.30 ms
-	}
-	cpu_time2 = dsecnd();
-	cout << "1000 assembly operations in " << cpu_time2 - cpu_time1 << " s\n";
-	// /Timing test
-	*/
 	
 }
 
